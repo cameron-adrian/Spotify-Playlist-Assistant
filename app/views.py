@@ -2,6 +2,8 @@
 from django.shortcuts import render
 from .models import Playlist
 
+from .secrets import Secrets
+
 # set up Pretty Printer
 import pprint
 
@@ -22,8 +24,6 @@ from spotipy.oauth2 import SpotifyOAuth
 
 scope = "ugc-image-upload user-follow-modify playlist-modify-private playlist-modify-public user-library-modify playlist-read-collaborative user-read-currently-playing user-follow-read user-read-playback-position user-read-playback-state playlist-read-private user-read-recently-played user-top-read user-read-email user-library-read user-read-private app-remote-control streaming user-modify-playback-state"
 
-CLIENT_ID = "c069f0ce51434241be88a7a0891093b5"
-CLIENT_SECRET = "edd7e6721ddf43da8c8c530ac1e55270"
 
 # AUTH_URL = "https://accounts.spotify.com/api/token"
 
@@ -46,8 +46,8 @@ CLIENT_SECRET = "edd7e6721ddf43da8c8c530ac1e55270"
 
 sp = spotipy.Spotify(
     auth_manager=SpotifyOAuth(
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
+        client_id=Secrets.CLIENT_ID,
+        client_secret=Secrets.CLIENT_SECRET,
         scope=scope,
         redirect_uri="http://127.0.0.1:8080",
         requests_timeout=10,
@@ -219,7 +219,7 @@ def home(request):
                     spotify_id, snapshot_id, name, collaborative, public
                 )
                 print(f'Playlist "{p.name}" updated to latest snapshot')
-        except Playlist.DoesNotExist:
+        except:
             save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public)
             # print(f'New playlist "{p.name}" saved to DB')
 
