@@ -1,0 +1,36 @@
+{% block content %}
+
+<div class="home-container">
+  <h2>Hello {{user.display_name}}!</h2>
+
+  <h1>You have {{playlists|length}} total playlists.</h1>
+
+  <!--Create and populate playlist table-->
+  <div>
+    <table id="playlists-table">
+      <tr>
+        <th>
+          Playlist
+        </th>
+        <th>
+          Tracks
+        </th>
+        <th>
+          Average Song Length
+        </th>
+        <th>
+          Total Duration
+        </th>
+      </tr>
+      {% for playlist in playlists|dictsort:"name" %}
+      <tr>
+        <td><a href={% url 'playlist' playlist.spotify_id %}>{{playlist.name}}</a></td>
+        <td>{{playlist.tracks.items|length}}</td>
+        <td>{{playlist.average_song_length}}</td>
+        <td>{{playlist.total_duration}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock content %}

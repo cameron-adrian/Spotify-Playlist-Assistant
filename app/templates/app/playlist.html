@@ -1,0 +1,58 @@
+{% extends 'main.html' %} {% block content %}
+
+<div>
+  {% comment %} {% for image in playlist.images %}
+  <img src="{{image.url}}" alt="Playlist Image" />
+  {% endfor %} {% endcomment %}
+  <img
+    src="{{playlist.images.0.url}}"
+    alt="Playlist Image"
+    width="300"
+    height="300"
+  />
+</div>
+<h1>
+  <a href="{{playlist.external_urls.spotify}}"> {{playlist.name}}</a>
+</h1>
+<p>Description: {{playlist.description}}</p>
+
+<h3>Total Duration: {{playlist.total_duration}}</h3>
+<h3>Average Song Length: {{playlist.average_song_length}}</h3>
+
+<h3>Total Tracks: {{playlist.tracks.total}}</h3>
+<h3>Collaborative: {{playlist.collaborative}}</h3>
+<h3>Followers: {{playlist.followers.total}}</h3>
+
+<!--Create and populate playlist table-->
+<div>
+  <table id="songs-table">
+    <tr>
+      <th>
+        Artist(s)
+        <button type="button" onclick="sortTable(0)">
+          Sort Alphabetically
+        </button>
+      </th>
+      <th>
+        Song
+        <button type="button" onclick="sortTable(1)">
+          Sort Alphabetically
+        </button>
+      </th>
+      <th>
+        Length in Milliseconds
+        <button type="button" onclick="sortTable(2)">Sort by Length</button>
+      </th>
+    </tr>
+    {% for i in playlist.tracks.items %}
+    <tr>
+      <td>{% for artist in i.track.artists %} {{artist.name}} {% endfor %}</td>
+      <td>{{i.track.name}}</td>
+      <td>{{i.track.duration_ms}}</td>
+      <!--This needs to be converted to minutes-->
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock content %}
