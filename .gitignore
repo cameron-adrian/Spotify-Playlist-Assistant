@@ -7,3 +7,4 @@
 *.pyc
 secrets.py
 .vscode
+db.sqlite3
