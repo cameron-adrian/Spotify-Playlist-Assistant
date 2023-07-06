@@ -111,6 +111,8 @@ def save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public):
     # Calculate Average Song Length
     if total_duration:
         average_song_length = round(total_duration / len(result["items"]), 0)
+    else:
+        average_song_length = None
 
     pl = Playlist(
         spotify_id=spotify_id,
