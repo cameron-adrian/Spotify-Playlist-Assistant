@@ -1,9 +1,8 @@
-{% block content %}
+{% block content %} {% load custom_filters %} {% load static %}
+<link rel="stylesheet" href="{% static 'styles/main.css' %}" />
 
 <div>
-  {% comment %} {% for image in playlist.images %}
-  <img src="{{image.url}}" alt="Playlist Image" />
-  {% endfor %} {% endcomment %}
+  <!--TODO: FIX: Image not loading-->
   <img
     src="{{playlist.images.0.url}}"
     alt="Playlist Image"
@@ -16,8 +15,11 @@
 </h1>
 <p>Description: {{playlist.description}}</p>
 
-<h3>Total Duration: {{playlist.total_duration}}</h3>
-<h3>Average Song Length: {{playlist.average_song_length}}</h3>
+<h3>
+  Average Song Length:
+  {{playlist.average_song_length|make_time_readable_minutes}}
+</h3>
+<h3>Total Duration: {{playlist.total_duration|make_time_readable_hours}}</h3>
 
 <h3>Total Tracks: {{playlist.tracks.total}}</h3>
 <h3>Collaborative: {{playlist.collaborative}}</h3>
@@ -49,7 +51,7 @@
       <td>{% for artist in i.track.artists %} {{artist.name}} {% endfor %}</td>
       <td>{{i.track.name}}</td>
       <td>{{i.track.duration_ms}}</td>
-      <!--This needs to be converted to minutes-->
+      <!--TODO: 3. This needs to be converted to minutes-->
     </tr>
     {% endfor %}
   </table>
