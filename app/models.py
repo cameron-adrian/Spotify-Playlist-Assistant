@@ -21,7 +21,7 @@ from django.urls import reverse
 class Playlist(models.Model):
     #     # Metadata
     class Meta:
-        ordering = ["-name"]
+        ordering = ["name"]
 
     # created_at = models.DateTimeField(auto_now_add=True) TODO: This isn't technically possible, you can only get when the first song was ADDED
     # updated_at = models.DateTimeField(auto_now=True)
@@ -36,7 +36,7 @@ class Playlist(models.Model):
     snapshot_id = models.CharField(max_length=100, null=True)
 
     # My calculations
-    average_song_length = models.FloatField(null=True)
+    average_song_length = models.SmallIntegerField(null=True)
     total_duration = models.SmallIntegerField(null=True)
 
     #     # Methods
