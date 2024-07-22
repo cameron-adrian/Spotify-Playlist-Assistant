@@ -1,0 +1,79 @@
+:root {
+  --spotify-green: #1db954;
+  --spotify-black: #121212;
+  --spotify-dark-gray: #212121;
+  --spotify-medium-gray: #535353;
+  --spotify-light-gray: #b3b3b3;
+}
+
+/* General Styles */
+body {
+  font-family: monospace, sans-serif;
+  background-color: var(--spotify-black);
+  color: var(--spotify-light-gray);
+  margin: 0;
+  padding-top: 1rem;
+}
+
+a {
+  color: var(--spotify-green);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  color: var(--spotify-green);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+table,
+th,
+td {
+  border: 1px solid var(--spotify-dark-gray);
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: var(--spotify-dark-gray);
+  color: var(--spotify-light-gray);
+}
+
+tr:nth-child(even) {
+  background-color: var(--spotify-medium-gray);
+}
+
+tr:hover {
+  background-color: var(--spotify-dark-gray);
+}
+
+button {
+  background-color: var(--spotify-green);
+  color: var(--spotify-black);
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: var(--spotify-light-gray);
+  color: var(--spotify-black);
+}
