@@ -1,5 +1,6 @@
 # Functions for interacting with the database and general data manipulation
 from ..utils.spotify import sp, fetch_all_items
+from ..models import Playlist
 
 # TODO: see if I need this? I seem to already be doing it with filters?
 # def make_time_readable(seconds):
@@ -11,6 +12,7 @@ from ..utils.spotify import sp, fetch_all_items
 
 #     return "%d:%02d:%02d" % (hour, minutes, seconds)
 
+# Save Playlist to Database
 def save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public):
     try:
         result = sp.playlist_items(playlist_id=spotify_id)
@@ -33,12 +35,7 @@ def save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public):
     number_of_tracks = len(result["items"])
     print(number_of_tracks)
 
-    # Calculate Average Song Length
-    if total_duration:
-        average_song_length = int(round(total_duration / number_of_tracks, 0))
-        print(average_song_length)
-    else:
-        average_song_length = None
+    average_track_length = calculate_average_track_length(total_duration, number_of_tracks)
 
     pl = Playlist(
         spotify_id=spotify_id,
@@ -47,7 +44,7 @@ def save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public):
         collaborative=collaborative,
         public=public,
         total_duration=total_duration,
-        average_song_length=average_song_length,
+        average_track_length=average_track_length,
         # number_of_tracks=number_of_tracks,
     )
 
@@ -63,3 +60,12 @@ def calculate_total_duration(tracks):
     ) / 1000
     
     return total_duration
+
+# Calculate Average track Length
+def calculate_average_track_length(total_duration, number_of_tracks):
+        if total_duration:
+            average_track_length = int(round(total_duration / number_of_tracks, 0))
+            print(average_track_length)
+        else:
+            average_track_length = None
+        return average_track_length
