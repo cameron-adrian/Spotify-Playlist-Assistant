@@ -12,7 +12,7 @@ from datetime import timedelta
 # Spotify Tools
 from .utils.spotify import sp, fetch_all_items, get_all_current_user_playlists, get_current_user
 # Database Tools
-from .utils.database_tools import make_time_readable, save_playlist_to_db
+from .utils.database_tools import save_playlist_to_db
 
 # -------------------- VIEWS --------------------
 # Home page that shows all the playlists
@@ -50,7 +50,7 @@ def home(request):
                 print(f'Playlist "{p.name}" updated to latest snapshot')
         except:
             save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public)
-            print(f'New playlist "{p.name}" saved to DB')
+            print(f'New playlist "{name}" saved to DB')
 
     playlists = Playlist.objects.all()
 
@@ -83,7 +83,6 @@ def playlist(request, id):
         playlist = sp.playlist(playlist_id=id)
         save_playlist_to_db(playlist["id"], playlist["snapshot_id"], playlist["name"], playlist["collaborative"], playlist["public"])
 
-    
 
     # or should I get it from Spotify instead? Probably not cuz I already got all the track items
 
