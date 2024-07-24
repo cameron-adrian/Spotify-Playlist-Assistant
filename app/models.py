@@ -36,7 +36,7 @@ class Playlist(models.Model):
     snapshot_id = models.CharField(max_length=100, null=True)
 
     # My calculations
-    average_song_length = models.SmallIntegerField(null=True)
+    average_track_length = models.SmallIntegerField(null=True)
     total_duration = models.SmallIntegerField(null=True)
 
     #     # Methods
