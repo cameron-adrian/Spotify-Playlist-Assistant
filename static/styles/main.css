@@ -34,6 +34,14 @@ p {
   color: var(--spotify-green);
 }
 
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--spotify-dark-gray);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

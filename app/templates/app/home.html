@@ -3,8 +3,10 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'styles/main.css' %}">
 <div class="home-container">
-  <h2>Hello {{user.display_name}}!</h2>
-  <h1>Here are your playlists: [Total: {{page_obj.paginator.count}}]</h1>
+  <header>
+    <h2>Hello {{user.display_name}}!</h2>
+    <h1>Here are your playlists: [Total: {{page_obj.paginator.count}}]</h1>
+  </header>
   <!--Create and populate playlist table-->
   <div>
     <table id="playlists-table">

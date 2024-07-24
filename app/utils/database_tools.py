@@ -58,7 +58,6 @@ def calculate_total_duration(tracks):
             item["track"]["duration_ms"] for item in tracks if item["track"] is not None
         )
     ) / 1000
-    
     return total_duration
 
 # Calculate Average track Length

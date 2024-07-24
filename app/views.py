@@ -22,7 +22,7 @@ def home(request):
     # maybe don't store everything? Just all the URIs or IDs for each playlist to then make calls later?
 
     # Get Current User's Playlists From Spotify
-    print("Retreiving all playlists from Spotify")
+    print("Retrieving all playlists from Spotify")
     playlists = get_all_current_user_playlists()
     print("Done getting playlists from Spotify")
 
