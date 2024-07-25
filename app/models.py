@@ -38,6 +38,7 @@ class Playlist(models.Model):
     # My calculations
     average_track_length = models.SmallIntegerField(null=True)
     total_duration = models.SmallIntegerField(null=True)
+    number_of_tracks = models.SmallIntegerField(null=True)
 
     #     # Methods
     #     def get_absolute_url(self):

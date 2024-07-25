@@ -14,6 +14,10 @@ from ..models import Playlist
 
 # Save Playlist to Database
 def save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public):
+    # TODO: I shouldn't make a request to spotify for the items just to get the tracks and then calculate the total, because spotify already gives me the total number of items in the playlist
+    # BUT I do need to calculate the average track length and total duration. So when is the best time to do that?
+    # BASICALLY can I get away with just saving the playlist to the database and then calculating the average track length and total duration when I need it? IE, when the user clicks into the playlist?
+    # OR is it fine to just show them a loading screen
     try:
         result = sp.playlist_items(playlist_id=spotify_id)
     except Exception as e:
@@ -33,9 +37,8 @@ def save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public):
     total_duration = calculate_total_duration(tracks)
 
     number_of_tracks = len(result["items"])
-    print(number_of_tracks)
 
-    average_track_length = calculate_average_track_length(total_duration, number_of_tracks)
+    average_track_length = calculate_average_track_length(total_duration, )
 
     pl = Playlist(
         spotify_id=spotify_id,
@@ -45,7 +48,7 @@ def save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public):
         public=public,
         total_duration=total_duration,
         average_track_length=average_track_length,
-        # number_of_tracks=number_of_tracks,
+        number_of_tracks=number_of_tracks,
     )
 
     pl.save()

@@ -28,7 +28,10 @@ def home(request):
 
     # Saving Playlist Data/Calculations to the DB
     print("Starting to save playlists to the database")
+
+    
     for playlist in playlists:
+        # Check if the playlist is owned by the user, if not, skip to the next one
         if playlist["owner"]["id"] == user["id"]:
             spotify_id = playlist["id"]
             snapshot_id = playlist["snapshot_id"]
@@ -36,8 +39,7 @@ def home(request):
             collaborative = bool(playlist["collaborative"])
             public = bool(playlist["public"])
         
-        # IF snapshot_id in Database equals the snapshot_id of the playlist we just pulled, skip to the next
-
+        # IF snapshot_id in Database equals the snapshot_id of the playlist we just pulled, skip to the next playlist
         try:
             p = Playlist.objects.get(spotify_id=spotify_id)
             if snapshot_id == p.snapshot_id:
@@ -52,6 +54,7 @@ def home(request):
             save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public)
             print(f'New playlist "{name}" saved to DB')
 
+    # Store all playlists from the database in a variable
     playlists = Playlist.objects.all()
 
     paginator = Paginator(playlists, 50)  # Show 50 playlists per page

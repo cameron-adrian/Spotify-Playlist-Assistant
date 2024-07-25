@@ -4,8 +4,8 @@
 <link rel="stylesheet" href="{% static 'styles/main.css' %}">
 <div class="home-container">
   <header>
-    <h2>Hello {{user.display_name}}!</h2>
-    <h1>Here are your playlists: [Total: {{page_obj.paginator.count}}]</h1>
+    <h2>Hello {{user.display_name}}.</h2>
+    <h1>Total Playlists: [{{page_obj.paginator.count}}]</h1>
   </header>
   <!--Create and populate playlist table-->
   <div>
@@ -15,7 +15,7 @@
           <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}">Playlist</a>
         </th>
         <th>
-          <a href="?sort_by=tracks__items__count&order={% if sort_by == 'tracks__items__count' and order == 'asc' %}desc{% else %}asc{% endif %}">Tracks</a>
+          <a href="?sort_by=number_of_tracks&order={% if sort_by == 'number_of_tracks' and order == 'asc' %}desc{% else %}asc{% endif %}">Tracks</a>
         </th>
         <th>
           <a href="?sort_by=average_track_length&order={% if sort_by == 'average_track_length' and order == 'asc' %}desc{% else %}asc{% endif %}">Average Song Length</a>
