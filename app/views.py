@@ -38,6 +38,8 @@ def home(request):
             name = playlist["name"]
             collaborative = bool(playlist["collaborative"])
             public = bool(playlist["public"])
+            number_of_tracks = playlist["tracks"]["total"]
+            print("A:" + str(number_of_tracks))
         
         # IF snapshot_id in Database equals the snapshot_id of the playlist we just pulled, skip to the next playlist
         try:
@@ -46,12 +48,14 @@ def home(request):
                 # print("Updated playlist already exists in database, no update needed")
                 continue
             else:
+                print("B:" + str(number_of_tracks))
                 save_playlist_to_db(
-                    spotify_id, snapshot_id, name, collaborative, public
+                    spotify_id, snapshot_id, name, collaborative, public, number_of_tracks
                 )
                 print(f'Playlist "{p.name}" updated to latest snapshot')
         except:
-            save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public)
+            print("C:" + str(number_of_tracks))
+            save_playlist_to_db(spotify_id, snapshot_id, name, collaborative, public, number_of_tracks)
             print(f'New playlist "{name}" saved to DB')
 
     # Store all playlists from the database in a variable

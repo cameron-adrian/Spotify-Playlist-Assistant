@@ -27,7 +27,7 @@
       {% for playlist in page_obj %}
       <tr>
         <td><a href={% url 'playlist' playlist.spotify_id %}>{{playlist.name}}</a></td>
-        <td>{{playlist.tracks.items|length}}</td>
+        <td>{{playlist.number_of_tracks}}</td>
         <td>{{playlist.average_track_length|make_time_readable_minutes}}</td>
         <td>{{playlist.total_duration|make_time_readable_hours}}</td>
       </tr>
