@@ -4,13 +4,10 @@
 <link rel="stylesheet" href="{% static 'styles/main.css' %}">
 <div class="home-container">
   <header>
-    <h1>Your Playlists ({{page_obj.paginator.count}})</h1>
-    <div class="actions">
-      <a href="{% url 'sync' %}" class="btn">Sync with Spotify</a>
-    </div>
+    <h1>Your Playlists <span style="color: var(--spotify-light-gray); font-weight: 400;">({{page_obj.paginator.count}})</span></h1>
+    <a href="{% url 'sync' %}" class="btn">Sync with Spotify</a>
   </header>
 
-  <!-- Filter by type -->
   <div class="filters">
     <a href="?sort_by={{sort_by}}&order={{order}}" {% if playlist_type == 'all' %}class="active"{% endif %}>All</a>
     <a href="?type=public&sort_by={{sort_by}}&order={{order}}" {% if playlist_type == 'public' %}class="active"{% endif %}>Public</a>
@@ -18,8 +15,9 @@
     <a href="?type=collaborative&sort_by={{sort_by}}&order={{order}}" {% if playlist_type == 'collaborative' %}class="active"{% endif %}>Collaborative</a>
   </div>
 
-  <div>
-    <table id="playlists-table">
+  {% if page_obj.paginator.count > 0 %}
+  <table id="playlists-table">
+    <thead>
       <tr>
         <th>
           <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Playlist</a>
@@ -28,12 +26,14 @@
           <a href="?sort_by=number_of_tracks&order={% if sort_by == 'number_of_tracks' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Tracks</a>
         </th>
         <th>
-          <a href="?sort_by=average_track_length&order={% if sort_by == 'average_track_length' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Avg Song Length</a>
+          <a href="?sort_by=average_track_length&order={% if sort_by == 'average_track_length' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Avg Length</a>
         </th>
         <th>
           <a href="?sort_by=total_duration&order={% if sort_by == 'total_duration' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Total Duration</a>
         </th>
       </tr>
+    </thead>
+    <tbody>
       {% for playlist in page_obj %}
       <tr>
         <td><a href="{% url 'playlist' playlist.spotify_id %}">{{playlist.name}}</a></td>
@@ -42,23 +42,30 @@
         <td>{{playlist.total_duration|make_time_readable_hours}}</td>
       </tr>
       {% endfor %}
-    </table>
-  </div>
+    </tbody>
+  </table>
 
+  {% if page_obj.paginator.num_pages > 1 %}
   <div class="pagination">
-    <span class="step-links">
-      {% if page_obj.has_previous %}
-        <a href="?page=1&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">&laquo; first</a>
-        <a href="?page={{ page_obj.previous_page_number }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">previous</a>
-      {% endif %}
-      <span class="current">
-        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-      </span>
-      {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">next</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">last &raquo;</a>
-      {% endif %}
+    {% if page_obj.has_previous %}
+      <a href="?page=1&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">&laquo; First</a>
+      <a href="?page={{ page_obj.previous_page_number }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">Previous</a>
+    {% endif %}
+    <span class="current">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
     </span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">Next</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">Last &raquo;</a>
+    {% endif %}
   </div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty-state">
+    <h2>No playlists yet</h2>
+    <p>Click "Sync with Spotify" to pull in your playlists.</p>
+  </div>
+  {% endif %}
 </div>
 {% endblock content %}

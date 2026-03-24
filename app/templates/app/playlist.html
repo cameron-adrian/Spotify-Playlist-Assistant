@@ -5,7 +5,7 @@
 
 <div class="playlist-header">
   {% if playlist.image_url %}
-  <img src="{{playlist.image_url}}" alt="Playlist Image" width="300" height="300" />
+  <img src="{{playlist.image_url}}" alt="{{playlist.name}} cover" />
   {% endif %}
 
   <div>
@@ -20,54 +20,52 @@
       <p>{{playlist.description}}</p>
     {% endif %}
 
-    <h3>Total Tracks: {{playlist.number_of_tracks}}</h3>
-    <h3>Average Song Length: {{playlist.average_track_length|make_time_readable_minutes}}</h3>
-    <h3>Total Duration: {{playlist.total_duration|make_time_readable_hours}}</h3>
-    <h3>Collaborative: {{playlist.collaborative}}</h3>
-    <h3>Public: {{playlist.public}}</h3>
+    <div class="playlist-stats">
+      <span class="stat"><strong>{{playlist.number_of_tracks}}</strong> tracks</span>
+      <span class="stat"><strong>{{playlist.average_track_length|make_time_readable_minutes}}</strong> avg</span>
+      <span class="stat"><strong>{{playlist.total_duration|make_time_readable_hours}}</strong> total</span>
+      {% if playlist.collaborative %}<span class="stat">Collaborative</span>{% endif %}
+      {% if playlist.public %}<span class="stat">Public</span>{% endif %}
+    </div>
   </div>
 </div>
 
-<div>
+<div class="track-table-wrapper">
   <table id="songs-table">
-    <tr>
-      <th>#</th>
-      <th>
-        <a href="?sort_by=artist&order={% if sort_by == 'artist' and order == 'asc' %}desc{% else %}asc{% endif %}">
-          Artist(s)
-        </a>
-      </th>
-      <th>
-        <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}">
-          Song
-        </a>
-      </th>
-      <th>
-        <a href="?sort_by=duration&order={% if sort_by == 'duration' and order == 'asc' %}desc{% else %}asc{% endif %}">
-          Duration
-        </a>
-      </th>
-      <th>
-        <a href="?sort_by=added_at&order={% if sort_by == 'added_at' and order == 'asc' %}desc{% else %}asc{% endif %}">
-          Added
-        </a>
-      </th>
-    </tr>
-    {% for pt in playlist_tracks %}
-    <tr>
-      <td>{{ pt.position|add:1 }}</td>
-      <td>
-        {% for artist in pt.track.artists.all %}
-          {{ artist.name }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-      </td>
-      <td>{{ pt.track.name }}</td>
-      <td>{{ pt.track.duration_seconds|make_time_readable_minutes }}</td>
-      <td>{% if pt.added_at %}{{ pt.added_at|date:"M d, Y" }}{% endif %}</td>
-    </tr>
-    {% endfor %}
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>
+          <a href="?sort_by=artist&order={% if sort_by == 'artist' and order == 'asc' %}desc{% else %}asc{% endif %}">Artist(s)</a>
+        </th>
+        <th>
+          <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}">Song</a>
+        </th>
+        <th>
+          <a href="?sort_by=duration&order={% if sort_by == 'duration' and order == 'asc' %}desc{% else %}asc{% endif %}">Duration</a>
+        </th>
+        <th>
+          <a href="?sort_by=added_at&order={% if sort_by == 'added_at' and order == 'asc' %}desc{% else %}asc{% endif %}">Added</a>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pt in playlist_tracks %}
+      <tr>
+        <td>{{ pt.position|add:1 }}</td>
+        <td>
+          {% for artist in pt.track.artists.all %}
+            {{ artist.name }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </td>
+        <td>{{ pt.track.name }}</td>
+        <td>{{ pt.track.duration_seconds|make_time_readable_minutes }}</td>
+        <td>{% if pt.added_at %}{{ pt.added_at|date:"M d, Y" }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
 </div>
 
-<p><a href="{% url 'app' %}">Back to all playlists</a></p>
+<a href="{% url 'app' %}" class="back-link">&larr; All playlists</a>
 {% endblock content %}
