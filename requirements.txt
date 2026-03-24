@@ -1,0 +1,5 @@
+Django>=4.2,<6.0
+spotipy>=2.23.0
+django-debug-toolbar>=4.2
+django-extensions>=3.2
+python-dotenv>=1.0.0

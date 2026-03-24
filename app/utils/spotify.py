@@ -1,17 +1,17 @@
 # Functions for interacting with Spotify API using Spotipy
+import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from ..secrets import Secrets
 
 # TODO: Implement oauth2 for user authentication
 scope = "ugc-image-upload user-follow-modify playlist-modify-private playlist-modify-public user-library-modify playlist-read-collaborative user-read-currently-playing user-follow-read user-read-playback-position user-read-playback-state playlist-read-private user-read-recently-played user-top-read user-read-email user-library-read user-read-private app-remote-control streaming user-modify-playback-state"
 
 sp = spotipy.Spotify(
     auth_manager=SpotifyOAuth(
-        client_id=Secrets.CLIENT_ID,
-        client_secret=Secrets.CLIENT_SECRET,
+        client_id=os.environ["SPOTIFY_CLIENT_ID"],
+        client_secret=os.environ["SPOTIFY_CLIENT_SECRET"],
         scope=scope,
-        redirect_uri="http://127.0.0.1:8080",
+        redirect_uri=os.environ.get("SPOTIFY_REDIRECT_URI", "http://127.0.0.1:8080"),
         requests_timeout=10,
     )
 )
