@@ -3,6 +3,6 @@ from . import views
 
 urlpatterns = [
     path("", views.home, name="app"),
-    path("playlist/<str:id>/", views.playlist, name="playlist"),
-    path("debug", views.debug, name="debug"),
+    path("playlist/<str:id>/", views.playlist_detail, name="playlist"),
+    path("sync/", views.sync, name="sync"),
 ]
