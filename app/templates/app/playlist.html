@@ -47,6 +47,7 @@
         <th>
           <a href="?sort_by=added_at&order={% if sort_by == 'added_at' and order == 'asc' %}desc{% else %}asc{% endif %}">Added</a>
         </th>
+        <th>Will Play At</th>
       </tr>
     </thead>
     <tbody>
@@ -61,6 +62,7 @@
         <td>{{ pt.track.name }}</td>
         <td>{{ pt.track.duration_seconds|make_time_readable_minutes }}</td>
         <td>{% if pt.added_at %}{{ pt.added_at|date:"M d, Y" }}{% endif %}</td>
+        <td>{% if pt.will_play_at %}{{ pt.will_play_at|date:"g:i A" }}{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
