@@ -1,6 +1,12 @@
-# Functions for interacting with Spotify API using Spotipy
+"""
+Spotify API helpers using Spotipy with session-based OAuth.
+
+Instead of a global cached client, each request builds a Spotify client
+from the access token stored in the Django session.
+"""
 import os
 import logging
+
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
@@ -15,42 +21,59 @@ SCOPE = (
     "user-modify-playback-state"
 )
 
-_sp = None
+
+def _get_oauth_manager():
+    """Build a SpotifyOAuth manager (stateless — no token cache)."""
+    return SpotifyOAuth(
+        client_id=os.environ["SPOTIFY_CLIENT_ID"],
+        client_secret=os.environ["SPOTIFY_CLIENT_SECRET"],
+        redirect_uri=os.environ.get(
+            "SPOTIFY_REDIRECT_URI", "http://127.0.0.1:8000/callback"
+        ),
+        scope=SCOPE,
+        cache_handler=spotipy.MemoryCacheHandler(),
+    )
 
 
-def get_spotify_client():
-    """Lazy-initialize the Spotify client so imports don't require credentials."""
-    global _sp
-    if _sp is None:
-        _sp = spotipy.Spotify(
-            auth_manager=SpotifyOAuth(
-                client_id=os.environ["SPOTIFY_CLIENT_ID"],
-                client_secret=os.environ["SPOTIFY_CLIENT_SECRET"],
-                scope=SCOPE,
-                redirect_uri=os.environ.get("SPOTIFY_REDIRECT_URI", "http://127.0.0.1:8080"),
-                requests_timeout=10,
-            )
-        )
-    return _sp
+def get_authorize_url():
+    """Return the Spotify authorize URL the user should be redirected to."""
+    oauth = _get_oauth_manager()
+    return oauth.get_authorize_url()
 
 
-# Keep `sp` as a lazy proxy for backwards compat
-class _SpotifyProxy:
-    """Proxy that defers client creation until first attribute access."""
-    def __getattr__(self, name):
-        return getattr(get_spotify_client(), name)
+def exchange_code(code):
+    """Exchange an authorization code for a token dict.
 
-sp = _SpotifyProxy()
+    Returns a dict with access_token, refresh_token, expires_at, etc.
+    """
+    oauth = _get_oauth_manager()
+    return oauth.get_access_token(code, as_dict=True, check_cache=False)
 
 
-def get_current_user():
-    client = get_spotify_client()
+def refresh_token(token_info):
+    """Refresh an expired token. Returns updated token dict."""
+    oauth = _get_oauth_manager()
+    return oauth.refresh_access_token(token_info["refresh_token"])
+
+
+def get_client(token_info):
+    """Build a Spotify client from a token dict (stored in the session)."""
+    oauth = _get_oauth_manager()
+    # Let spotipy handle token refresh automatically
+    if oauth.is_token_expired(token_info):
+        token_info = refresh_token(token_info)
+    return spotipy.Spotify(auth=token_info["access_token"]), token_info
+
+
+def get_current_user(token_info):
+    """Return the current user's profile dict."""
+    client, token_info = get_client(token_info)
     logger.info("Getting current user from Spotify")
-    user = client.current_user()
-    return user
+    return client.current_user(), token_info
 
 
 def fetch_all_items(client, initial_results):
+    """Page through all results from a Spotify list endpoint."""
     items = initial_results["items"]
     while initial_results["next"]:
         try:
@@ -60,9 +83,3 @@ def fetch_all_items(client, initial_results):
             logger.error("Error fetching next page: %s", e)
             break
     return items
-
-
-def get_all_current_user_playlists():
-    client = get_spotify_client()
-    initial_results = client.current_user_playlists()
-    return fetch_all_items(client, initial_results)

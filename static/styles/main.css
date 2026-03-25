@@ -304,6 +304,59 @@ tr:hover {
   color: var(--spotify-white);
 }
 
+/* ---- Login page ---- */
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-card {
+  text-align: center;
+  padding: 3rem;
+  max-width: 400px;
+}
+
+.login-logo {
+  margin-bottom: 1.5rem;
+}
+
+.login-card h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-card p {
+  margin-bottom: 2rem;
+  font-size: 0.9375rem;
+}
+
+.btn-login {
+  font-size: 1rem;
+  padding: 0.875rem 3rem;
+}
+
+/* ---- Header actions ---- */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-actions .logout-link {
+  color: var(--spotify-light-gray);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: color var(--transition);
+}
+
+.header-actions .logout-link:hover {
+  color: var(--spotify-white);
+}
+
 /* ---- Empty state ---- */
 
 .empty-state {

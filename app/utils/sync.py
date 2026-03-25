@@ -6,20 +6,20 @@ import logging
 from datetime import datetime, timezone
 
 from ..models import Artist, Playlist, PlaylistTrack, Track
-from .spotify import sp, fetch_all_items
+from .spotify import fetch_all_items
 
 logger = logging.getLogger(__name__)
 
 
-def sync_playlists(user_id):
+def sync_playlists(client, user_id):
     """
     Pull all playlists owned by user_id from Spotify.
     Skip any playlist whose snapshot_id hasn't changed.
     Returns (synced_count, skipped_count).
     """
     logger.info("Fetching playlists from Spotify for user %s", user_id)
-    initial_results = sp.current_user_playlists()
-    all_playlists = fetch_all_items(sp, initial_results)
+    initial_results = client.current_user_playlists()
+    all_playlists = fetch_all_items(client, initial_results)
 
     synced = 0
     skipped = 0
@@ -41,17 +41,17 @@ def sync_playlists(user_id):
             pass
 
         # Fetch full playlist details (includes description, images, followers)
-        _sync_single_playlist(spotify_id, sp_playlist)
+        _sync_single_playlist(client, spotify_id, sp_playlist)
         synced += 1
 
     logger.info("Sync complete: %d synced, %d unchanged", synced, skipped)
     return synced, skipped
 
 
-def _sync_single_playlist(spotify_id, sp_playlist_summary):
+def _sync_single_playlist(client, spotify_id, sp_playlist_summary):
     """Sync a single playlist: metadata + all tracks."""
     # Get full playlist detail for fields not in the summary
-    sp_detail = sp.playlist(spotify_id)
+    sp_detail = client.playlist(spotify_id)
 
     images = sp_detail.get("images", [])
     image_url = images[0]["url"] if images else ""
@@ -59,7 +59,7 @@ def _sync_single_playlist(spotify_id, sp_playlist_summary):
 
     # Fetch all tracks (handles pagination)
     initial_tracks = sp_detail.get("tracks", {})
-    track_items = fetch_all_items(sp, initial_tracks)
+    track_items = fetch_all_items(client, initial_tracks)
 
     # Calculate aggregates
     total_duration_ms = 0
@@ -92,10 +92,10 @@ def _sync_single_playlist(spotify_id, sp_playlist_summary):
     )
 
     # Sync tracks
-    _sync_tracks_for_playlist(playlist, track_items)
+    _sync_tracks_for_playlist(client, playlist, track_items)
 
 
-def _sync_tracks_for_playlist(playlist, track_items):
+def _sync_tracks_for_playlist(client, playlist, track_items):
     """Replace all PlaylistTrack entries for this playlist with fresh data."""
     # Clear existing entries for this playlist
     PlaylistTrack.objects.filter(playlist=playlist).delete()
