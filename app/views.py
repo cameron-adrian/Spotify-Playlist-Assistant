@@ -131,6 +131,15 @@ def playlist_detail(request, id):
         "artist": "track__artists__name",
         "duration": "track__duration_ms",
         "added_at": "added_at",
+        "acousticness": "track__acousticness",
+        "danceability": "track__danceability",
+        "energy": "track__energy",
+        "instrumentalness": "track__instrumentalness",
+        "liveness": "track__liveness",
+        "loudness": "track__loudness",
+        "speechiness": "track__speechiness",
+        "tempo": "track__tempo",
+        "valence": "track__valence",
     }
     sort_field = sort_map.get(sort_by, "position")
     playlist_tracks = playlist_tracks.order_by(f"{order_prefix}{sort_field}")
@@ -189,6 +198,7 @@ def playlist_detail(request, id):
         "order": order,
         "heatmap_by": heatmap_by,
         "heatmap_features": heatmap_features,
+        "audio_features": AUDIO_FEATURE_FIELDS,
     }
     return render(request, "app/playlist.html", context)
 

@@ -46,3 +46,53 @@ def heatmap_style(pt, feature):
     lightness = 50
     alpha = round(distance * 0.35, 3)  # max 0.35 opacity so text stays readable
     return mark_safe(f'style="background-color: hsla({hue}, {saturation}%, {lightness}%, {alpha})"')
+
+
+FEATURE_DISPLAY = {
+    "duration_ms": "Duration",
+    "acousticness": "Acoustic",
+    "danceability": "Dance",
+    "energy": "Energy",
+    "instrumentalness": "Instr.",
+    "liveness": "Live",
+    "loudness": "Loud",
+    "speechiness": "Speech",
+    "tempo": "Tempo",
+    "valence": "Valence",
+}
+
+
+@register.filter
+def feature_label(feature):
+    """Short display name for an audio feature."""
+    return FEATURE_DISPLAY.get(feature, feature)
+
+
+@register.filter
+def feature_value(track, feature):
+    """Format a track's audio feature value for display."""
+    val = getattr(track, feature, None)
+    if val is None:
+        return "-"
+    if feature == "loudness":
+        return f"{val:.1f} dB"
+    if feature == "tempo":
+        return f"{val:.0f}"
+    if feature == "duration_ms":
+        s = val // 1000
+        m, s = divmod(s, 60)
+        return f"{m}:{s:02d}"
+    # 0-1 features: show as percentage
+    return f"{val:.0%}"
+
+
+@register.filter
+def get_item(dictionary, key):
+    """Look up a key in a dict from a template."""
+    return dictionary.get(key, "")
+
+
+@register.filter
+def sort_arrow(order):
+    """Return an arrow character for the current sort direction."""
+    return mark_safe("&#9650;") if order == "asc" else mark_safe("&#9660;")

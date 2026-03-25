@@ -197,6 +197,27 @@ tr:hover {
   padding-right: 1.25rem;
 }
 
+/* Audio feature columns */
+.col-feature {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+th.col-feature {
+  font-size: 0.625rem;
+}
+
+.col-num {
+  width: 2.5rem;
+  text-align: right;
+}
+
+/* Allow horizontal scroll on wide tables */
+.track-table-wrapper {
+  overflow-x: auto;
+}
+
 /* ---- Playlist Detail Header ---- */
 
 .playlist-header {
