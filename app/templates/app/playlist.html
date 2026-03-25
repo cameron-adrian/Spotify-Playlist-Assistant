@@ -1,61 +1,91 @@
-{% block content %} {% load custom_filters %} {% load static %}
+{% block content %}
+{% load custom_filters %}
+{% load static %}
 <link rel="stylesheet" href="{% static 'styles/main.css' %}" />
 
-<div>
-  <!--TODO: FIX: Image not loading 
-  Gotta write a function to get anything extra that a playlist needs at the time this page is loaded-->
-  <img
-    src="{{playlist.images.0.url}}"
-    alt="Playlist Image"
-    width="300"
-    height="300"
-  />
+<div class="playlist-header">
+  {% if playlist.image_url %}
+  <img src="{{playlist.image_url}}" alt="{{playlist.name}} cover" />
+  {% endif %}
+
+  <div>
+    <h1>
+      {% if playlist.external_url %}
+        <a href="{{playlist.external_url}}">{{playlist.name}}</a>
+      {% else %}
+        {{playlist.name}}
+      {% endif %}
+    </h1>
+    {% if playlist.description %}
+      <p>{{playlist.description}}</p>
+    {% endif %}
+
+    <div class="playlist-stats">
+      <span class="stat"><strong>{{playlist.number_of_tracks}}</strong> tracks</span>
+      <span class="stat"><strong>{{playlist.average_track_length|make_time_readable_minutes}}</strong> avg</span>
+      <span class="stat"><strong>{{playlist.total_duration|make_time_readable_hours}}</strong> total</span>
+      {% if playlist.collaborative %}<span class="stat">Collaborative</span>{% endif %}
+      {% if playlist.public %}<span class="stat">Public</span>{% endif %}
+    </div>
+  </div>
 </div>
-<h1>
-  <a href="{{playlist.external_urls.spotify}}"> {{playlist.name}}</a>
-</h1>
-<p>Description: {{playlist.description}}</p>
 
-<h3>
-  Average Song Length:
-  {{playlist.average_track_length|make_time_readable_minutes}}
-</h3>
-<h3>Total Duration: {{playlist.total_duration|make_time_readable_hours}}</h3>
-
-<h3>Total Tracks: {{playlist.tracks.total}}</h3>
-<h3>Collaborative: {{playlist.collaborative}}</h3>
-<h3>Followers: {{playlist.followers.total}}</h3>
-
-<!--Create and populate playlist table-->
-<div>
-  <table id="songs-table">
-    <tr>
-      <th>
-        Artist(s)
-        <button type="button" onclick="sortTable(0)">
-          Sort Alphabetically
-        </button>
-      </th>
-      <th>
-        Song
-        <button type="button" onclick="sortTable(1)">
-          Sort Alphabetically
-        </button>
-      </th>
-      <th>
-        Length in Milliseconds
-        <button type="button" onclick="sortTable(2)">Sort by Length</button>
-      </th>
-    </tr>
-    {% for i in playlist.tracks.items %}
-    <tr>
-      <td>{% for artist in i.track.artists %} {{artist.name}} {% endfor %}</td>
-      <td>{{i.track.name}}</td>
-      <td>{{i.track.duration_ms}}</td>
-      <!--TODO: 3. This needs to be converted to minutes-->
-    </tr>
+<div class="track-table-wrapper">
+  <div class="heatmap-controls">
+    <span class="heatmap-label">Heat map:</span>
+    <a href="?sort_by={{ sort_by }}&order={{ order }}" class="heatmap-option {% if not heatmap_by %}active{% endif %}">Off</a>
+    {% for feat in heatmap_features %}
+      <a href="?sort_by={{ sort_by }}&order={{ order }}&heatmap={{ feat }}"
+         class="heatmap-option {% if heatmap_by == feat %}active{% endif %}">
+        {{ feat }}
+      </a>
     {% endfor %}
+    {% if heatmap_by %}
+    <span class="heatmap-legend">
+      <span class="legend-cool"></span> low
+      <span class="legend-neutral"></span> average
+      <span class="legend-hot"></span> high
+    </span>
+    {% endif %}
+  </div>
+
+  <table id="songs-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>
+          <a href="?sort_by=artist&order={% if sort_by == 'artist' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">Artist(s)</a>
+        </th>
+        <th>
+          <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">Song</a>
+        </th>
+        <th>
+          <a href="?sort_by=duration&order={% if sort_by == 'duration' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">Duration</a>
+        </th>
+        <th>
+          <a href="?sort_by=added_at&order={% if sort_by == 'added_at' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">Added</a>
+        </th>
+        <th>Will Play At</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pt in playlist_tracks %}
+      <tr {% if heatmap_by %}{{ pt|heatmap_style:heatmap_by }}{% endif %}>
+        <td>{{ pt.position|add:1 }}</td>
+        <td>
+          {% for artist in pt.track.artists.all %}
+            {{ artist.name }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </td>
+        <td>{{ pt.track.name }}</td>
+        <td>{{ pt.track.duration_seconds|make_time_readable_minutes }}</td>
+        <td>{% if pt.added_at %}{{ pt.added_at|date:"M d, Y" }}{% endif %}</td>
+        <td>{% if pt.will_play_at %}{{ pt.will_play_at|date:"g:i A" }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
 </div>
 
+<a href="{% url 'app' %}" class="back-link">&larr; All playlists</a>
 {% endblock content %}

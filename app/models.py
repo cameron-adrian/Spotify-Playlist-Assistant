@@ -1,69 +1,80 @@
 from django.db import models
-from django.urls import reverse
-
-# Create your models here.
-
-# KEEP FILLING ALL OF THESE OUT FROM THE SPOTIFY RESOURCES WHEN FEELING DUMB/LOW BRAIN ENERGY
 
 
-# User Stats?
-# class User(models.Model):
-#     # https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile
-
-#     name = models.CharField(max_length=30, null=False)
-
-#     def __str__(self):
-#         # """String for representing the User object (in Admin site etc.)."""
-#         return self.name
-
-
-# What if it was called playlist stats? Like only my calculations
 class Playlist(models.Model):
-    #     # Metadata
     class Meta:
         ordering = ["name"]
 
-    # created_at = models.DateTimeField(auto_now_add=True) TODO: This isn't technically possible, you can only get when the first song was ADDED
-    # updated_at = models.DateTimeField(auto_now=True)
-
-    # https://developer.spotify.com/documentation/web-api/reference/get-playlist
+    # Spotify fields
+    spotify_id = models.CharField(max_length=255, unique=True, primary_key=True)
     name = models.CharField(max_length=100, null=True)
-    spotify_id = models.CharField(
-        max_length=255, unique=True, blank=False, null=False, primary_key=True
-    )
+    description = models.TextField(blank=True, default="")
     collaborative = models.BooleanField(null=True)
     public = models.BooleanField(null=True)
     snapshot_id = models.CharField(max_length=100, null=True)
+    image_url = models.URLField(blank=True, default="")
+    external_url = models.URLField(blank=True, default="")
+    owner_id = models.CharField(max_length=255, blank=True, default="")
 
-    # My calculations
-    average_track_length = models.SmallIntegerField(null=True)
-    total_duration = models.SmallIntegerField(null=True)
-    number_of_tracks = models.SmallIntegerField(null=True)
-
-    #     # Methods
-    #     def get_absolute_url(self):
-    #         """Returns the URL to access a particular instance of Playlist."""
-    #         return reverse('model-detail-view', args=[str(self.id)])
-
-    # These come from Spotify, may not actually use them?
-    # description = models.TextField(max_length=300, null=True, blank=True)
-
-    # followers = models.PositiveIntegerField()
-    # href = models.URLField()
-    # images = models.ImageField(height_field=, width_field=) Maybe don't even use this one and just ask Spotipy every time? Or Cache? idk
-    # owner = This is a reference to another Model, right? A User Model?
-
-    # tracks = models.ManyToManyField("app.Model", verbose_name=_("tracks")) >>> a track can be on many playlists, many playlists can have the same track
+    # Aggregates (pre-calculated during sync)
+    number_of_tracks = models.IntegerField(default=0)
+    total_duration = models.IntegerField(default=0)  # seconds
+    average_track_length = models.IntegerField(default=0)  # seconds
 
     def __str__(self):
-        # """String for representing the Playlist object (in Admin site etc.)."""
+        return self.name or self.spotify_id
+
+
+class Artist(models.Model):
+    spotify_id = models.CharField(max_length=255, unique=True, primary_key=True)
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
         return self.name
 
 
-# class Track(models.Model):
-#     name = models.CharField(
-#         max_length=200, help_text='This should be the name of the playlist')
+class Track(models.Model):
+    spotify_id = models.CharField(max_length=255, unique=True, primary_key=True)
+    name = models.CharField(max_length=500)
+    duration_ms = models.IntegerField(default=0)
+    artists = models.ManyToManyField(Artist, related_name="tracks")
+    external_url = models.URLField(blank=True, default="")
 
-#     def __str__(self):
-#         # """String for representing the Track object (in Admin site etc.)."""
-#         return self.name
+    # Audio features (from Spotify audio-features endpoint)
+    acousticness = models.FloatField(null=True, blank=True)
+    danceability = models.FloatField(null=True, blank=True)
+    energy = models.FloatField(null=True, blank=True)
+    instrumentalness = models.FloatField(null=True, blank=True)
+    liveness = models.FloatField(null=True, blank=True)
+    loudness = models.FloatField(null=True, blank=True)  # dB, typically -60 to 0
+    speechiness = models.FloatField(null=True, blank=True)
+    tempo = models.FloatField(null=True, blank=True)  # BPM
+    valence = models.FloatField(null=True, blank=True)  # 0.0 to 1.0 (sad to happy)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def duration_seconds(self):
+        return self.duration_ms // 1000
+
+
+class PlaylistTrack(models.Model):
+    """Through model: a track's membership in a playlist."""
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name="playlist_tracks")
+    track = models.ForeignKey(Track, on_delete=models.CASCADE, related_name="playlist_tracks")
+    position = models.IntegerField(default=0)
+    added_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["position"]
+        unique_together = [("playlist", "track", "position")]
+
+    def __str__(self):
+        return f"{self.playlist.name} - {self.track.name} (#{self.position})"
