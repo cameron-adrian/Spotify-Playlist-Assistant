@@ -357,6 +357,74 @@ tr:hover {
   color: var(--spotify-white);
 }
 
+/* ---- Heatmap controls ---- */
+
+.heatmap-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  font-size: 0.8125rem;
+}
+
+.heatmap-label {
+  color: var(--spotify-light-gray);
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+.heatmap-option {
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  color: var(--spotify-medium-gray);
+  border: 1px solid var(--spotify-card-gray);
+  transition: all var(--transition);
+  text-transform: capitalize;
+}
+
+.heatmap-option:hover {
+  color: var(--spotify-white);
+  border-color: var(--spotify-medium-gray);
+}
+
+.heatmap-option.active {
+  color: var(--spotify-black);
+  background-color: var(--spotify-green);
+  border-color: var(--spotify-green);
+}
+
+.heatmap-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-left: auto;
+  color: var(--spotify-light-gray);
+  font-size: 0.75rem;
+}
+
+.legend-cool,
+.legend-neutral,
+.legend-hot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.legend-cool {
+  background-color: hsla(200, 80%, 50%, 0.35);
+}
+
+.legend-neutral {
+  background-color: hsla(0, 0%, 50%, 0.1);
+  border: 1px solid var(--spotify-card-gray);
+}
+
+.legend-hot {
+  background-color: hsla(0, 80%, 50%, 0.35);
+}
+
 /* ---- Empty state ---- */
 
 .empty-state {

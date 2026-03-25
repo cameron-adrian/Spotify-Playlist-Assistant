@@ -12,7 +12,7 @@ from .utils.spotify import (
     get_client,
     get_current_user,
 )
-from .utils.sync import sync_playlists
+from .utils.sync import sync_playlists, AUDIO_FEATURE_FIELDS
 
 
 VALID_SORT_FIELDS = {"name", "number_of_tracks", "average_track_length", "total_duration"}
@@ -155,11 +155,40 @@ def playlist_detail(request, id):
     for pt in playlist_tracks:
         pt.will_play_at = will_play_at_map.get(pt.position)
 
+    # Compute heat map data: for each feature, find min/max across the
+    # playlist so we can compute a 0-1 percentile for each track.
+    heatmap_features = ["duration_ms"] + AUDIO_FEATURE_FIELDS
+    feature_ranges = {}
+    for feat in heatmap_features:
+        vals = []
+        for pt in playlist_tracks:
+            val = getattr(pt.track, feat, None)
+            if val is not None:
+                vals.append(val)
+        if vals:
+            min_v, max_v = min(vals), max(vals)
+            feature_ranges[feat] = (min_v, max_v)
+
+    # Attach a heatmap dict to each playlist_track: feature -> 0.0..1.0
+    for pt in playlist_tracks:
+        pt.heatmap = {}
+        for feat, (min_v, max_v) in feature_ranges.items():
+            val = getattr(pt.track, feat, None)
+            if val is not None and max_v != min_v:
+                pt.heatmap[feat] = (val - min_v) / (max_v - min_v)
+            else:
+                pt.heatmap[feat] = 0.5  # no spread = neutral
+
+    # Determine which feature to heat-map (from query param)
+    heatmap_by = request.GET.get("heatmap", "")
+
     context = {
         "playlist": playlist,
         "playlist_tracks": playlist_tracks,
         "sort_by": sort_by,
         "order": order,
+        "heatmap_by": heatmap_by,
+        "heatmap_features": heatmap_features,
     }
     return render(request, "app/playlist.html", context)
 

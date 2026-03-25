@@ -31,28 +31,46 @@
 </div>
 
 <div class="track-table-wrapper">
+  <div class="heatmap-controls">
+    <span class="heatmap-label">Heat map:</span>
+    <a href="?sort_by={{ sort_by }}&order={{ order }}" class="heatmap-option {% if not heatmap_by %}active{% endif %}">Off</a>
+    {% for feat in heatmap_features %}
+      <a href="?sort_by={{ sort_by }}&order={{ order }}&heatmap={{ feat }}"
+         class="heatmap-option {% if heatmap_by == feat %}active{% endif %}">
+        {{ feat }}
+      </a>
+    {% endfor %}
+    {% if heatmap_by %}
+    <span class="heatmap-legend">
+      <span class="legend-cool"></span> low
+      <span class="legend-neutral"></span> average
+      <span class="legend-hot"></span> high
+    </span>
+    {% endif %}
+  </div>
+
   <table id="songs-table">
     <thead>
       <tr>
         <th>#</th>
         <th>
-          <a href="?sort_by=artist&order={% if sort_by == 'artist' and order == 'asc' %}desc{% else %}asc{% endif %}">Artist(s)</a>
+          <a href="?sort_by=artist&order={% if sort_by == 'artist' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">Artist(s)</a>
         </th>
         <th>
-          <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}">Song</a>
+          <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">Song</a>
         </th>
         <th>
-          <a href="?sort_by=duration&order={% if sort_by == 'duration' and order == 'asc' %}desc{% else %}asc{% endif %}">Duration</a>
+          <a href="?sort_by=duration&order={% if sort_by == 'duration' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">Duration</a>
         </th>
         <th>
-          <a href="?sort_by=added_at&order={% if sort_by == 'added_at' and order == 'asc' %}desc{% else %}asc{% endif %}">Added</a>
+          <a href="?sort_by=added_at&order={% if sort_by == 'added_at' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">Added</a>
         </th>
         <th>Will Play At</th>
       </tr>
     </thead>
     <tbody>
       {% for pt in playlist_tracks %}
-      <tr>
+      <tr {% if heatmap_by %}{{ pt|heatmap_style:heatmap_by }}{% endif %}>
         <td>{{ pt.position|add:1 }}</td>
         <td>
           {% for artist in pt.track.artists.all %}

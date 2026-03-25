@@ -100,6 +100,8 @@ def _sync_tracks_for_playlist(client, playlist, track_items):
     # Clear existing entries for this playlist
     PlaylistTrack.objects.filter(playlist=playlist).delete()
 
+    # First pass: upsert all tracks and collect IDs for audio features
+    track_map = {}  # spotify_id -> (Track, position, added_at)
     for position, item in enumerate(track_items):
         track_data = item.get("track")
         if not track_data or not track_data.get("id"):
@@ -137,9 +139,51 @@ def _sync_tracks_for_playlist(client, playlist, track_items):
             except (ValueError, AttributeError):
                 pass
 
+        track_map[track_data["id"]] = (track, position, added_at)
+
+    # Fetch audio features in batches of 100 (Spotify API limit)
+    track_ids = list(track_map.keys())
+    _fetch_audio_features(client, track_ids)
+
+    # Second pass: create PlaylistTrack entries
+    for spotify_id, (track, position, added_at) in track_map.items():
         PlaylistTrack.objects.create(
             playlist=playlist,
             track=track,
             position=position,
             added_at=added_at,
         )
+
+
+AUDIO_FEATURE_FIELDS = [
+    "acousticness", "danceability", "energy", "instrumentalness",
+    "liveness", "loudness", "speechiness", "tempo", "valence",
+]
+
+
+def _fetch_audio_features(client, track_ids):
+    """Fetch audio features from Spotify and save to Track models."""
+    for i in range(0, len(track_ids), 100):
+        batch = track_ids[i:i + 100]
+        try:
+            results = client.audio_features(batch)
+        except Exception as e:
+            logger.error("Error fetching audio features: %s", e)
+            continue
+
+        if not results:
+            continue
+
+        for features in results:
+            if not features:
+                continue
+            try:
+                track = Track.objects.get(spotify_id=features["id"])
+            except Track.DoesNotExist:
+                continue
+
+            for field in AUDIO_FEATURE_FIELDS:
+                val = features.get(field)
+                if val is not None:
+                    setattr(track, field, val)
+            track.save(update_fields=AUDIO_FEATURE_FIELDS)

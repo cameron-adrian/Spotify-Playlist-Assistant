@@ -43,6 +43,17 @@ class Track(models.Model):
     artists = models.ManyToManyField(Artist, related_name="tracks")
     external_url = models.URLField(blank=True, default="")
 
+    # Audio features (from Spotify audio-features endpoint)
+    acousticness = models.FloatField(null=True, blank=True)
+    danceability = models.FloatField(null=True, blank=True)
+    energy = models.FloatField(null=True, blank=True)
+    instrumentalness = models.FloatField(null=True, blank=True)
+    liveness = models.FloatField(null=True, blank=True)
+    loudness = models.FloatField(null=True, blank=True)  # dB, typically -60 to 0
+    speechiness = models.FloatField(null=True, blank=True)
+    tempo = models.FloatField(null=True, blank=True)  # BPM
+    valence = models.FloatField(null=True, blank=True)  # 0.0 to 1.0 (sad to happy)
+
     class Meta:
         ordering = ["name"]
 
