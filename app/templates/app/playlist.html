@@ -1,6 +1,7 @@
 {% block content %}
 {% load custom_filters %}
 {% load static %}
+<script src="{% static 'js/theme.js' %}"></script>
 <link rel="stylesheet" href="{% static 'styles/main.css' %}" />
 
 <div class="playlist-header">
@@ -106,5 +107,17 @@
   </table>
 </div>
 
-<a href="{% url 'app' %}" class="back-link">&larr; All playlists</a>
+<div class="playlist-footer">
+  <a href="{% url 'app' %}" class="back-link">&larr; All playlists</a>
+  <div class="theme-switcher">
+    <button data-theme="dark" onclick="setTheme('dark')">Dark</button>
+    <button data-theme="light" onclick="setTheme('light')">Light</button>
+    <button data-theme="midnight" onclick="setTheme('midnight')">Midnight</button>
+  </div>
+</div>
+<script>
+  document.querySelectorAll(".theme-switcher button").forEach(function(btn) {
+    btn.classList.toggle("active", btn.dataset.theme === (localStorage.getItem("theme") || "dark"));
+  });
+</script>
 {% endblock content %}
