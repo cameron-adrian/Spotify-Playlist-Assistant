@@ -1,11 +1,17 @@
 {% block content %}
 {% load custom_filters %}
 {% load static %}
+<script src="{% static 'js/theme.js' %}"></script>
 <link rel="stylesheet" href="{% static 'styles/main.css' %}">
 <div class="home-container">
   <header>
     <h1>Your Playlists <span style="color: var(--spotify-light-gray); font-weight: 400;">({{page_obj.paginator.count}})</span></h1>
     <div class="header-actions">
+      <div class="theme-switcher">
+        <button data-theme="dark" onclick="setTheme('dark')">Dark</button>
+        <button data-theme="light" onclick="setTheme('light')">Light</button>
+        <button data-theme="midnight" onclick="setTheme('midnight')">Midnight</button>
+      </div>
       <a href="{% url 'sync' %}" class="btn">Sync with Spotify</a>
       <a href="{% url 'logout' %}" class="logout-link">Log out</a>
     </div>
@@ -71,4 +77,9 @@
   </div>
   {% endif %}
 </div>
+<script>
+  document.querySelectorAll(".theme-switcher button").forEach(function(btn) {
+    btn.classList.toggle("active", btn.dataset.theme === (localStorage.getItem("theme") || "dark"));
+  });
+</script>
 {% endblock content %}
