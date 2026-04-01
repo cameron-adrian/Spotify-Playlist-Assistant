@@ -114,7 +114,7 @@ def _sync_tracks_for_playlist(client, playlist, track_items):
                 continue
             artist, _ = Artist.objects.update_or_create(
                 spotify_id=sp_artist["id"],
-                defaults={"name": sp_artist.get("name", "")},
+                defaults={"name": sp_artist.get("name") or ""},
             )
             artist_objs.append(artist)
 
