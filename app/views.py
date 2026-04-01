@@ -87,6 +87,11 @@ def home(request):
     """List all playlists from the database. No Spotify API calls."""
     playlists = Playlist.objects.all()
 
+    # Search
+    q = request.GET.get("q", "").strip()
+    if q:
+        playlists = playlists.filter(name__icontains=q)
+
     # Sorting
     sort_by = request.GET.get("sort_by", "name")
     order = request.GET.get("order", "asc")
@@ -114,6 +119,7 @@ def home(request):
         "sort_by": sort_by,
         "order": order,
         "playlist_type": playlist_type or "all",
+        "q": q,
     }
     return render(request, "app/home.html", context)
 
