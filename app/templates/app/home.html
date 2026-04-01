@@ -13,7 +13,10 @@
         <button data-theme="light" onclick="setTheme('light')">Light</button>
         <button data-theme="midnight" onclick="setTheme('midnight')">Midnight</button>
       </div>
-      <a href="{% url 'sync' %}" class="btn">Sync with Spotify</a>
+      <form method="post" action="{% url 'sync' %}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn">Sync with Spotify</button>
+      </form>
       <a href="{% url 'logout' %}" class="logout-link">Log out</a>
     </div>
   </header>

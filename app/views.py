@@ -1,9 +1,11 @@
+import secrets
 from datetime import timedelta
 from functools import wraps
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from .models import Playlist, PlaylistTrack
 from .utils.spotify import (
@@ -49,15 +51,22 @@ def login(request):
 
 def spotify_login(request):
     """Redirect the user to Spotify's authorization page."""
-    return redirect(get_authorize_url())
+    state = secrets.token_urlsafe(32)
+    request.session["spotify_oauth_state"] = state
+    return redirect(get_authorize_url(state=state))
 
 
 def callback(request):
     """Handle the redirect back from Spotify after authorization."""
     code = request.GET.get("code")
     error = request.GET.get("error")
+    received_state = request.GET.get("state")
+    expected_state = request.session.pop("spotify_oauth_state", None)
 
     if error or not code:
+        return redirect("login")
+
+    if not expected_state or not secrets.compare_digest(expected_state, received_state or ""):
         return redirect("login")
 
     token_info = exchange_code(code)
@@ -83,6 +92,8 @@ def home(request):
     order = request.GET.get("order", "asc")
     if sort_by not in VALID_SORT_FIELDS:
         sort_by = "name"
+    if order not in ("asc", "desc"):
+        order = "asc"
     order_prefix = "-" if order == "desc" else ""
     playlists = playlists.order_by(f"{order_prefix}{sort_by}")
 
@@ -123,6 +134,8 @@ def playlist_detail(request, id):
     # Sorting tracks
     sort_by = request.GET.get("sort_by", "position")
     order = request.GET.get("order", "asc")
+    if order not in ("asc", "desc"):
+        order = "asc"
     order_prefix = "-" if order == "desc" else ""
 
     sort_map = {
@@ -190,6 +203,8 @@ def playlist_detail(request, id):
 
     # Determine which feature to heat-map (from query param)
     heatmap_by = request.GET.get("heatmap", "")
+    if heatmap_by not in heatmap_features:
+        heatmap_by = ""
 
     context = {
         "playlist": playlist,
@@ -204,6 +219,7 @@ def playlist_detail(request, id):
 
 
 @login_required_spotify
+@require_POST
 def sync(request):
     """Pull latest data from Spotify and update the database."""
     client = _get_spotify_client(request)

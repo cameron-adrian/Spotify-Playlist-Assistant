@@ -35,10 +35,10 @@ def _get_oauth_manager():
     )
 
 
-def get_authorize_url():
+def get_authorize_url(state):
     """Return the Spotify authorize URL the user should be redirected to."""
     oauth = _get_oauth_manager()
-    return oauth.get_authorize_url()
+    return oauth.get_authorize_url(state=state)
 
 
 def exchange_code(code):
