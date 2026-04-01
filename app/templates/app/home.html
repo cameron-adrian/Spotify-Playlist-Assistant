@@ -1,5 +1,6 @@
 {% block content %}
 {% load custom_filters %}
+{% load humanize %}
 {% load static %}
 <script src="{% static 'js/theme.js' %}"></script>
 <link rel="stylesheet" href="{% static 'styles/main.css' %}">
@@ -28,25 +29,34 @@
   <table id="playlists-table">
     <thead>
       <tr>
-        <th>
-          <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Playlist</a>
+        <th{% if sort_by == 'name' %} class="sorted"{% endif %}>
+          <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Playlist{% if sort_by == 'name' %} {{ order|sort_arrow }}{% endif %}</a>
         </th>
-        <th>
-          <a href="?sort_by=number_of_tracks&order={% if sort_by == 'number_of_tracks' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Tracks</a>
+        <th{% if sort_by == 'number_of_tracks' %} class="sorted"{% endif %}>
+          <a href="?sort_by=number_of_tracks&order={% if sort_by == 'number_of_tracks' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Tracks{% if sort_by == 'number_of_tracks' %} {{ order|sort_arrow }}{% endif %}</a>
         </th>
-        <th>
-          <a href="?sort_by=average_track_length&order={% if sort_by == 'average_track_length' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Avg Length</a>
+        <th{% if sort_by == 'average_track_length' %} class="sorted"{% endif %}>
+          <a href="?sort_by=average_track_length&order={% if sort_by == 'average_track_length' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Avg Length{% if sort_by == 'average_track_length' %} {{ order|sort_arrow }}{% endif %}</a>
         </th>
-        <th>
-          <a href="?sort_by=total_duration&order={% if sort_by == 'total_duration' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Total Duration</a>
+        <th{% if sort_by == 'total_duration' %} class="sorted"{% endif %}>
+          <a href="?sort_by=total_duration&order={% if sort_by == 'total_duration' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Total Duration{% if sort_by == 'total_duration' %} {{ order|sort_arrow }}{% endif %}</a>
         </th>
       </tr>
     </thead>
     <tbody>
       {% for playlist in page_obj %}
       <tr>
-        <td><a href="{% url 'playlist' playlist.spotify_id %}">{{playlist.name}}</a></td>
-        <td>{{playlist.number_of_tracks}}</td>
+        <td>
+          <a href="{% url 'playlist' playlist.spotify_id %}" class="playlist-name-cell">
+            {% if playlist.image_url %}
+              <img class="playlist-thumb" src="{{playlist.image_url}}" alt="" width="48" height="48">
+            {% else %}
+              <div class="playlist-thumb-placeholder"></div>
+            {% endif %}
+            <span>{{playlist.name}}</span>
+          </a>
+        </td>
+        <td>{{playlist.number_of_tracks|intcomma}}</td>
         <td>{{playlist.average_track_length|make_time_readable_minutes}}</td>
         <td>{{playlist.total_duration|make_time_readable_hours}}</td>
       </tr>

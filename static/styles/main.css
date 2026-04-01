@@ -206,6 +206,10 @@ th a:hover {
   color: var(--spotify-white);
 }
 
+th.sorted a {
+  color: var(--spotify-white);
+}
+
 td {
   font-size: 0.875rem;
   color: var(--spotify-light-gray);
@@ -262,6 +266,43 @@ th.col-feature {
 /* Allow horizontal scroll on wide tables */
 .track-table-wrapper {
   overflow-x: auto;
+}
+
+/* Right-align numeric columns in playlists table */
+#playlists-table th:nth-child(n+2),
+#playlists-table td:nth-child(n+2) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Thumbnail + name flex layout in playlists table */
+.playlist-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.playlist-thumb,
+.playlist-thumb-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.playlist-thumb {
+  object-fit: cover;
+}
+
+.playlist-thumb-placeholder {
+  background-color: var(--spotify-card-gray);
+}
+
+.playlist-name-cell span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ---- Playlist Detail Header ---- */
