@@ -44,6 +44,15 @@ def sync_playlists(client, user_id):
         _sync_single_playlist(client, spotify_id, sp_playlist)
         synced += 1
 
+    # Backfill audio features for any tracks missing them (e.g. from a
+    # previously failed sync, or playlists skipped due to matching snapshot_id)
+    missing_ids = list(
+        Track.objects.filter(energy__isnull=True).values_list("spotify_id", flat=True)
+    )
+    if missing_ids:
+        logger.info("Backfilling audio features for %d tracks", len(missing_ids))
+        _fetch_audio_features(client, missing_ids)
+
     logger.info("Sync complete: %d synced, %d unchanged", synced, skipped)
     return synced, skipped
 
@@ -172,6 +181,7 @@ def _fetch_audio_features(client, track_ids):
             continue
 
         if not results:
+            logger.warning("audio_features returned empty for batch starting at index %d", i)
             continue
 
         for features in results:
