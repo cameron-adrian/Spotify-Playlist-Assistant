@@ -206,6 +206,10 @@ th a:hover {
   color: var(--spotify-white);
 }
 
+th.sorted a {
+  color: var(--spotify-white);
+}
+
 td {
   font-size: 0.875rem;
   color: var(--spotify-light-gray);
@@ -262,6 +266,13 @@ th.col-feature {
 /* Allow horizontal scroll on wide tables */
 .track-table-wrapper {
   overflow-x: auto;
+}
+
+/* Right-align numeric columns in playlists table */
+#playlists-table th:nth-child(n+2),
+#playlists-table td:nth-child(n+2) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---- Playlist Detail Header ---- */

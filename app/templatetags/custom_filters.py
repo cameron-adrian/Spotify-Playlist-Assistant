@@ -11,7 +11,7 @@ def make_time_readable_hours(duration):
 
     minutes, seconds = divmod(duration, 60)
     hours, minutes = divmod(minutes, 60)
-    return f"{hours} hours, {minutes} minutes, {seconds} seconds"
+    return f"{int(hours)}h {int(minutes)}m"
 
 
 @register.filter
@@ -20,7 +20,7 @@ def make_time_readable_minutes(duration):
         return "N/A"
 
     minutes, seconds = divmod(duration, 60)
-    return f"{int(minutes)} minutes, {int(round(seconds,0))} seconds"
+    return f"{int(minutes)}:{int(round(seconds, 0)):02d}"
 
 
 @register.filter

@@ -1,5 +1,6 @@
 {% block content %}
 {% load custom_filters %}
+{% load humanize %}
 {% load static %}
 <script src="{% static 'js/theme.js' %}"></script>
 <link rel="stylesheet" href="{% static 'styles/main.css' %}" />
@@ -22,7 +23,7 @@
     {% endif %}
 
     <div class="playlist-stats">
-      <span class="stat"><strong>{{playlist.number_of_tracks}}</strong> tracks</span>
+      <span class="stat"><strong>{{playlist.number_of_tracks|intcomma}}</strong> tracks</span>
       <span class="stat"><strong>{{playlist.average_track_length|make_time_readable_minutes}}</strong> avg</span>
       <span class="stat"><strong>{{playlist.total_duration|make_time_readable_hours}}</strong> total</span>
       {% if playlist.collaborative %}<span class="stat">Collaborative</span>{% endif %}
@@ -54,30 +55,30 @@
     <thead>
       <tr>
         <th class="col-num">#</th>
-        <th>
+        <th{% if sort_by == 'artist' %} class="sorted"{% endif %}>
           <a href="?sort_by=artist&order={% if sort_by == 'artist' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">
             Artist(s){% if sort_by == 'artist' %} {{ order|sort_arrow }}{% endif %}
           </a>
         </th>
-        <th>
+        <th{% if sort_by == 'name' %} class="sorted"{% endif %}>
           <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">
             Song{% if sort_by == 'name' %} {{ order|sort_arrow }}{% endif %}
           </a>
         </th>
-        <th>
+        <th{% if sort_by == 'duration' %} class="sorted"{% endif %}>
           <a href="?sort_by=duration&order={% if sort_by == 'duration' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">
             Duration{% if sort_by == 'duration' %} {{ order|sort_arrow }}{% endif %}
           </a>
         </th>
         {% for feat in audio_features %}
-        <th class="col-feature">
+        <th class="col-feature{% if sort_by == feat %} sorted{% endif %}">
           <a href="?sort_by={{ feat }}&order={% if sort_by == feat and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}"
              title="{{ feat }}">
             {{ feat|feature_label }}{% if sort_by == feat %} {{ order|sort_arrow }}{% endif %}
           </a>
         </th>
         {% endfor %}
-        <th>
+        <th{% if sort_by == 'added_at' %} class="sorted"{% endif %}>
           <a href="?sort_by=added_at&order={% if sort_by == 'added_at' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">
             Added{% if sort_by == 'added_at' %} {{ order|sort_arrow }}{% endif %}
           </a>
