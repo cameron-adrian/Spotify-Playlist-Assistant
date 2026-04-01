@@ -21,11 +21,20 @@
     </div>
   </header>
 
+  <div class="search-bar">
+    <form method="get" action="">
+      <input type="search" name="q" class="search-input" placeholder="Search playlists…" value="{{ q }}" autofocus>
+      {% if sort_by != 'name' %}<input type="hidden" name="sort_by" value="{{ sort_by }}">{% endif %}
+      {% if order != 'asc' %}<input type="hidden" name="order" value="{{ order }}">{% endif %}
+      {% if playlist_type != 'all' %}<input type="hidden" name="type" value="{{ playlist_type }}">{% endif %}
+    </form>
+  </div>
+
   <div class="filters">
-    <a href="?sort_by={{sort_by}}&order={{order}}" {% if playlist_type == 'all' %}class="active"{% endif %}>All</a>
-    <a href="?type=public&sort_by={{sort_by}}&order={{order}}" {% if playlist_type == 'public' %}class="active"{% endif %}>Public</a>
-    <a href="?type=private&sort_by={{sort_by}}&order={{order}}" {% if playlist_type == 'private' %}class="active"{% endif %}>Private</a>
-    <a href="?type=collaborative&sort_by={{sort_by}}&order={{order}}" {% if playlist_type == 'collaborative' %}class="active"{% endif %}>Collaborative</a>
+    <a href="?sort_by={{sort_by}}&order={{order}}{% if q %}&q={{q}}{% endif %}" {% if playlist_type == 'all' %}class="active"{% endif %}>All</a>
+    <a href="?type=public&sort_by={{sort_by}}&order={{order}}{% if q %}&q={{q}}{% endif %}" {% if playlist_type == 'public' %}class="active"{% endif %}>Public</a>
+    <a href="?type=private&sort_by={{sort_by}}&order={{order}}{% if q %}&q={{q}}{% endif %}" {% if playlist_type == 'private' %}class="active"{% endif %}>Private</a>
+    <a href="?type=collaborative&sort_by={{sort_by}}&order={{order}}{% if q %}&q={{q}}{% endif %}" {% if playlist_type == 'collaborative' %}class="active"{% endif %}>Collaborative</a>
   </div>
 
   {% if page_obj.paginator.count > 0 %}
@@ -33,16 +42,16 @@
     <thead>
       <tr>
         <th{% if sort_by == 'name' %} class="sorted"{% endif %}>
-          <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Playlist{% if sort_by == 'name' %} {{ order|sort_arrow }}{% endif %}</a>
+          <a href="?sort_by=name&order={% if sort_by == 'name' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}{% if q %}&q={{q}}{% endif %}">Playlist{% if sort_by == 'name' %} {{ order|sort_arrow }}{% endif %}</a>
         </th>
         <th{% if sort_by == 'number_of_tracks' %} class="sorted"{% endif %}>
-          <a href="?sort_by=number_of_tracks&order={% if sort_by == 'number_of_tracks' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Tracks{% if sort_by == 'number_of_tracks' %} {{ order|sort_arrow }}{% endif %}</a>
+          <a href="?sort_by=number_of_tracks&order={% if sort_by == 'number_of_tracks' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}{% if q %}&q={{q}}{% endif %}">Tracks{% if sort_by == 'number_of_tracks' %} {{ order|sort_arrow }}{% endif %}</a>
         </th>
         <th{% if sort_by == 'average_track_length' %} class="sorted"{% endif %}>
-          <a href="?sort_by=average_track_length&order={% if sort_by == 'average_track_length' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Avg Length{% if sort_by == 'average_track_length' %} {{ order|sort_arrow }}{% endif %}</a>
+          <a href="?sort_by=average_track_length&order={% if sort_by == 'average_track_length' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}{% if q %}&q={{q}}{% endif %}">Avg Length{% if sort_by == 'average_track_length' %} {{ order|sort_arrow }}{% endif %}</a>
         </th>
         <th{% if sort_by == 'total_duration' %} class="sorted"{% endif %}>
-          <a href="?sort_by=total_duration&order={% if sort_by == 'total_duration' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}">Total Duration{% if sort_by == 'total_duration' %} {{ order|sort_arrow }}{% endif %}</a>
+          <a href="?sort_by=total_duration&order={% if sort_by == 'total_duration' and order == 'asc' %}desc{% else %}asc{% endif %}&type={{playlist_type}}{% if q %}&q={{q}}{% endif %}">Total Duration{% if sort_by == 'total_duration' %} {{ order|sort_arrow }}{% endif %}</a>
         </th>
       </tr>
     </thead>
@@ -70,23 +79,28 @@
   {% if page_obj.paginator.num_pages > 1 %}
   <div class="pagination">
     {% if page_obj.has_previous %}
-      <a href="?page=1&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">&laquo; First</a>
-      <a href="?page={{ page_obj.previous_page_number }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">Previous</a>
+      <a href="?page=1&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}{% if q %}&q={{q}}{% endif %}">&laquo; First</a>
+      <a href="?page={{ page_obj.previous_page_number }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}{% if q %}&q={{q}}{% endif %}">Previous</a>
     {% endif %}
     <span class="current">
       Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
     </span>
     {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">Next</a>
-      <a href="?page={{ page_obj.paginator.num_pages }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}">Last &raquo;</a>
+      <a href="?page={{ page_obj.next_page_number }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}{% if q %}&q={{q}}{% endif %}">Next</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}&sort_by={{sort_by}}&order={{order}}&type={{playlist_type}}{% if q %}&q={{q}}{% endif %}">Last &raquo;</a>
     {% endif %}
   </div>
   {% endif %}
 
   {% else %}
   <div class="empty-state">
-    <h2>No playlists yet</h2>
-    <p>Click "Sync with Spotify" to pull in your playlists.</p>
+    {% if q %}
+      <h2>No playlists found</h2>
+      <p>No playlists match "{{ q }}".</p>
+    {% else %}
+      <h2>No playlists yet</h2>
+      <p>Click "Sync with Spotify" to pull in your playlists.</p>
+    {% endif %}
   </div>
   {% endif %}
 </div>

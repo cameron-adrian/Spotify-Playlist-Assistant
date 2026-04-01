@@ -33,6 +33,11 @@
 </div>
 
 <div class="track-table-wrapper">
+  <div class="search-bar">
+    <input type="search" id="track-search" class="search-input" placeholder="Search tracks or artists…">
+  </div>
+  <div id="track-search-empty" class="search-empty" style="display:none;">No tracks match your search.</div>
+
   <div class="heatmap-controls">
     <span class="heatmap-label">Heat map:</span>
     <a href="?sort_by={{ sort_by }}&order={{ order }}" class="heatmap-option {% if not heatmap_by %}active{% endif %}">Off</a>
@@ -120,5 +125,26 @@
   document.querySelectorAll(".theme-switcher button").forEach(function(btn) {
     btn.classList.toggle("active", btn.dataset.theme === (localStorage.getItem("theme") || "dark"));
   });
+
+  (function() {
+    var searchInput = document.getElementById("track-search");
+    var emptyMsg = document.getElementById("track-search-empty");
+    var tbody = document.querySelector("#songs-table tbody");
+
+    searchInput.addEventListener("input", function() {
+      var query = this.value.toLowerCase().trim();
+      var rows = tbody.querySelectorAll("tr");
+      var visibleCount = 0;
+      rows.forEach(function(row) {
+        // col index 1 = artist, col index 2 = track name
+        var artist = row.cells[1] ? row.cells[1].textContent.toLowerCase() : "";
+        var trackName = row.cells[2] ? row.cells[2].textContent.toLowerCase() : "";
+        var visible = !query || artist.includes(query) || trackName.includes(query);
+        row.style.display = visible ? "" : "none";
+        if (visible) visibleCount++;
+      });
+      emptyMsg.style.display = (query && visibleCount === 0) ? "" : "none";
+    });
+  })();
 </script>
 {% endblock content %}
