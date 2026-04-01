@@ -46,7 +46,16 @@
     <tbody>
       {% for playlist in page_obj %}
       <tr>
-        <td><a href="{% url 'playlist' playlist.spotify_id %}">{{playlist.name}}</a></td>
+        <td>
+          <a href="{% url 'playlist' playlist.spotify_id %}" class="playlist-name-cell">
+            {% if playlist.image_url %}
+              <img class="playlist-thumb" src="{{playlist.image_url}}" alt="" width="48" height="48">
+            {% else %}
+              <div class="playlist-thumb-placeholder"></div>
+            {% endif %}
+            <span>{{playlist.name}}</span>
+          </a>
+        </td>
         <td>{{playlist.number_of_tracks|intcomma}}</td>
         <td>{{playlist.average_track_length|make_time_readable_minutes}}</td>
         <td>{{playlist.total_duration|make_time_readable_hours}}</td>
