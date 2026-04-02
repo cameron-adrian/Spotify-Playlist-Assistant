@@ -187,6 +187,7 @@ def playlist_detail(request, id):
     # playlist so we can compute a 0-1 percentile for each track.
     heatmap_features = ["duration_ms"] + AUDIO_FEATURE_FIELDS
     feature_ranges = {}
+    has_audio_features = False
     for feat in heatmap_features:
         vals = []
         for pt in playlist_tracks:
@@ -196,6 +197,8 @@ def playlist_detail(request, id):
         if vals:
             min_v, max_v = min(vals), max(vals)
             feature_ranges[feat] = (min_v, max_v)
+            if feat in AUDIO_FEATURE_FIELDS:
+                has_audio_features = True
 
     # Attach a heatmap dict to each playlist_track: feature -> 0.0..1.0
     for pt in playlist_tracks:
@@ -220,6 +223,7 @@ def playlist_detail(request, id):
         "heatmap_by": heatmap_by,
         "heatmap_features": heatmap_features,
         "audio_features": AUDIO_FEATURE_FIELDS,
+        "has_audio_features": has_audio_features,
     }
     return render(request, "app/playlist.html", context)
 
