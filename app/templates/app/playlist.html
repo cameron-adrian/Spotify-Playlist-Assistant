@@ -35,12 +35,19 @@
   <div class="heatmap-controls">
     <span class="heatmap-label">Heat map:</span>
     <a href="?sort_by={{ sort_by }}&order={{ order }}" class="heatmap-option {% if not heatmap_by %}active{% endif %}">Off</a>
-    {% for feat in heatmap_features %}
-      <a href="?sort_by={{ sort_by }}&order={{ order }}&heatmap={{ feat }}"
-         class="heatmap-option {% if heatmap_by == feat %}active{% endif %}">
-        {{ feat|feature_label }}
+    {% if has_audio_features %}
+      {% for feat in heatmap_features %}
+        <a href="?sort_by={{ sort_by }}&order={{ order }}&heatmap={{ feat }}"
+           class="heatmap-option {% if heatmap_by == feat %}active{% endif %}">
+          {{ feat|feature_label }}
+        </a>
+      {% endfor %}
+    {% else %}
+      <a href="?sort_by={{ sort_by }}&order={{ order }}&heatmap=duration_ms"
+         class="heatmap-option {% if heatmap_by == 'duration_ms' %}active{% endif %}">
+        Duration
       </a>
-    {% endfor %}
+    {% endif %}
     {% if heatmap_by %}
     <span class="heatmap-legend">
       <span class="legend-cool"></span> low
@@ -69,6 +76,7 @@
             Duration{% if sort_by == 'duration' %} {{ order|sort_arrow }}{% endif %}
           </a>
         </th>
+        {% if has_audio_features %}
         {% for feat in audio_features %}
         <th class="col-feature">
           <a href="?sort_by={{ feat }}&order={% if sort_by == feat and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}"
@@ -77,6 +85,7 @@
           </a>
         </th>
         {% endfor %}
+        {% endif %}
         <th>
           <a href="?sort_by=added_at&order={% if sort_by == 'added_at' and order == 'asc' %}desc{% else %}asc{% endif %}{% if heatmap_by %}&heatmap={{ heatmap_by }}{% endif %}">
             Added{% if sort_by == 'added_at' %} {{ order|sort_arrow }}{% endif %}
@@ -96,9 +105,11 @@
         </td>
         <td>{{ pt.track.name }}</td>
         <td>{{ pt.track.duration_seconds|make_time_readable_minutes }}</td>
+        {% if has_audio_features %}
         {% for feat in audio_features %}
         <td class="col-feature">{{ pt.track|feature_value:feat }}</td>
         {% endfor %}
+        {% endif %}
         <td>{% if pt.added_at %}{{ pt.added_at|date:"M d, Y" }}{% endif %}</td>
         <td>{% if pt.will_play_at %}{{ pt.will_play_at|date:"g:i A" }}{% endif %}</td>
       </tr>

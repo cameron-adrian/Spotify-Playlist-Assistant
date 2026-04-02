@@ -3,7 +3,10 @@ Sync service: pulls data from Spotify and updates the local database.
 Called explicitly (via refresh button), NOT on every page load.
 """
 import logging
+import time
 from datetime import datetime, timezone
+
+import requests as _requests
 
 from ..models import Artist, Playlist, PlaylistTrack, Track
 from .spotify import fetch_all_items
@@ -51,7 +54,7 @@ def sync_playlists(client, user_id):
     )
     if missing_ids:
         logger.info("Backfilling audio features for %d tracks", len(missing_ids))
-        _fetch_audio_features(client, missing_ids)
+        _fetch_audio_features(missing_ids)
 
     logger.info("Sync complete: %d synced, %d unchanged", synced, skipped)
     return synced, skipped
@@ -150,9 +153,8 @@ def _sync_tracks_for_playlist(client, playlist, track_items):
 
         track_map[track_data["id"]] = (track, position, added_at)
 
-    # Fetch audio features in batches of 100 (Spotify API limit)
     track_ids = list(track_map.keys())
-    _fetch_audio_features(client, track_ids)
+    _fetch_audio_features(track_ids)
 
     # Second pass: create PlaylistTrack entries
     for spotify_id, (track, position, added_at) in track_map.items():
@@ -169,31 +171,52 @@ AUDIO_FEATURE_FIELDS = [
     "liveness", "loudness", "speechiness", "tempo", "valence",
 ]
 
+RECCOBEATS_BASE = "https://api.reccobeats.com"
 
-def _fetch_audio_features(client, track_ids):
-    """Fetch audio features from Spotify and save to Track models."""
+
+def _fetch_audio_features(track_ids):
+    """Fetch audio features from ReccoBeats and save to Track models."""
     for i in range(0, len(track_ids), 100):
         batch = track_ids[i:i + 100]
+        _reccobeats_audio_features_batch(batch)
+
+
+def _reccobeats_audio_features_batch(track_ids, _retries=3):
+    params = {"ids": ",".join(track_ids)}
+    for attempt in range(_retries):
         try:
-            results = client.audio_features(batch)
+            resp = _requests.get(
+                f"{RECCOBEATS_BASE}/v1/audio-features",
+                params=params,
+                timeout=10,
+            )
         except Exception as e:
-            logger.error("Error fetching audio features: %s", e)
+            logger.error("ReccoBeats request error: %s", e)
+            return
+
+        if resp.status_code == 429:
+            retry_after = int(resp.headers.get("Retry-After", 5))
+            logger.warning("ReccoBeats rate limited; retrying in %ds", retry_after)
+            time.sleep(retry_after)
             continue
 
-        if not results:
-            logger.warning("audio_features returned empty for batch starting at index %d", i)
-            continue
+        if not resp.ok:
+            logger.error("ReccoBeats audio-features returned %d", resp.status_code)
+            return
 
-        for features in results:
-            if not features:
+        items = resp.json().get("content", [])
+        for item in items:
+            href = item.get("href", "")
+            spotify_id = href.rsplit("/", 1)[-1] if href else None
+            if not spotify_id:
                 continue
             try:
-                track = Track.objects.get(spotify_id=features["id"])
+                track = Track.objects.get(spotify_id=spotify_id)
             except Track.DoesNotExist:
                 continue
-
             for field in AUDIO_FEATURE_FIELDS:
-                val = features.get(field)
+                val = item.get(field)
                 if val is not None:
                     setattr(track, field, val)
             track.save(update_fields=AUDIO_FEATURE_FIELDS)
+        return
