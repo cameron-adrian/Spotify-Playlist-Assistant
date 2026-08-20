@@ -60,6 +60,19 @@ def sync_playlists(client, user_id):
     return synced, skipped
 
 
+def _get_track(playlist_item):
+    """Pull the track payload out of a playlist item.
+
+    Spotify renamed this field from `track` to `item` in February 2026. The
+    old key is deprecated but still populated, so prefer the new one and fall
+    back for as long as it lasts.
+    """
+    track_data = playlist_item.get("item")
+    if track_data is None:
+        track_data = playlist_item.get("track")
+    return track_data
+
+
 def _sync_single_playlist(client, spotify_id, sp_playlist_summary):
     """Sync a single playlist: metadata + all tracks."""
     # Get full playlist detail for fields not in the summary
@@ -69,15 +82,17 @@ def _sync_single_playlist(client, spotify_id, sp_playlist_summary):
     image_url = images[0]["url"] if images else ""
     external_urls = sp_detail.get("external_urls", {})
 
-    # Fetch all tracks (handles pagination)
-    initial_tracks = sp_detail.get("tracks", {})
+    # Fetch all tracks (handles pagination). The playlist object embeds the
+    # first page too, but under the deprecated `tracks` key, so go straight
+    # to /playlists/{id}/items instead.
+    initial_tracks = client.playlist_items(spotify_id, additional_types=("track",))
     track_items = fetch_all_items(client, initial_tracks)
 
     # Calculate aggregates
     total_duration_ms = 0
     valid_track_count = 0
     for item in track_items:
-        track_data = item.get("track")
+        track_data = _get_track(item)
         if track_data and track_data.get("duration_ms"):
             total_duration_ms += track_data["duration_ms"]
             valid_track_count += 1
@@ -115,7 +130,7 @@ def _sync_tracks_for_playlist(client, playlist, track_items):
     # First pass: upsert all tracks and collect IDs for audio features
     track_map = {}  # spotify_id -> (Track, position, added_at)
     for position, item in enumerate(track_items):
-        track_data = item.get("track")
+        track_data = _get_track(item)
         if not track_data or not track_data.get("id"):
             continue  # skip local files / unavailable tracks
 
