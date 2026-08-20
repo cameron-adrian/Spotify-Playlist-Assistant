@@ -12,12 +12,15 @@ from spotipy.oauth2 import SpotifyOAuth
 
 logger = logging.getLogger(__name__)
 
+# `user-read-email` and `user-read-private` are omitted: the only endpoint
+# that asks for them is GET /me, and every field they gate (email, country,
+# product, explicit_content) was deprecated in February 2026.
 SCOPE = (
     "ugc-image-upload user-follow-modify playlist-modify-private playlist-modify-public "
     "user-library-modify playlist-read-collaborative user-read-currently-playing "
     "user-follow-read user-read-playback-position user-read-playback-state "
-    "playlist-read-private user-read-recently-played user-top-read user-read-email "
-    "user-library-read user-read-private app-remote-control streaming "
+    "playlist-read-private user-read-recently-played user-top-read "
+    "user-library-read app-remote-control streaming "
     "user-modify-playback-state"
 )
 
